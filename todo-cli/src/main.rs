@@ -6,7 +6,6 @@ use todo_cli::Todo;
 
 use crate::repository::ShowTodosOptions;
 
-mod lib;
 mod repository;
 
 fn main() {
@@ -40,12 +39,10 @@ fn main() {
             }
             "delete" => {
                 match parts[1].parse::<u32>() {
-                    Ok(id) => {
-                        match todo_repo.delete_todo(id) {
-                            Some(todo) => println!("Todo {:?} successfully deleted!", todo),
-                            _ => println!("Error: todo n°{} does not exist", id)
-                        }
-                    }
+                    Ok(id) => match todo_repo.delete_todo(id) {
+                        Some(todo) => println!("Todo {:?} successfully deleted!", todo),
+                        _ => println!("Error: todo n°{} does not exist", id),
+                    },
                     Err(e) => {
                         // Conversion failed
                         println!("Failed to parse number: {}", e);
@@ -54,14 +51,28 @@ fn main() {
                 continue;
             }
             "done" => {
-                println!("done a todo");
+                match parts[1].parse::<u32>() {
+                    Ok(id) => {
+                        todo_repo.mark_as_done(id);
+                        println!("Todo n°{} marked as done", id);
+                    }
+                    Err(e) => {
+                        // Conversion failed
+                        println!("Failed to parse number: {}", e);
+                    }
+                }
                 continue;
             }
             "show" => {
-                println!("Show all the todos");
-                let all_todos: Vec<&Todo> = todo_repo.show_todos(&ShowTodosOptions::All);
+                let todos_to_show = match parts[1] {
+                    "done" => todo_repo.show_todos(&ShowTodosOptions::Done),
+                    "todo" => todo_repo.show_todos(&ShowTodosOptions::Todo),
+                    _ => todo_repo.show_todos(&ShowTodosOptions::All),
+                };
                 println!("############################################");
-                println!("{:?}", all_todos);
+                for (index, todo) in todos_to_show.iter().enumerate() {
+                    println!(" • {}: {}", index + 1, todo.body());
+                }
                 println!("############################################");
                 continue;
             }
