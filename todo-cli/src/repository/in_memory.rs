@@ -32,12 +32,11 @@ impl TodoRepository for InMemoryRepository {
     }
 
     fn mark_as_done(&mut self, id: u32) -> bool {
-        match self.db.get(&id) {
-            Some(value) => {
-                self.db.insert(id, Todo::mark_as_done(value.clone()));
-                true
-            }
-            _ => false,
+        if let Some(todo) = self.db.get_mut(&id) {
+            todo.mark_as_done();
+            true
+        } else {
+            false
         }
     }
 }
