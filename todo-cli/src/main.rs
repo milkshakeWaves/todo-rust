@@ -1,13 +1,10 @@
-use std::io;
-use std::io::Write;
-
-use repository::{InMemoryRepository, TodoRepository};
-use todo_cli::Todo;
-
-use crate::repository::ShowTodosOptions;
-
 mod repository;
 
+use std::io;
+use std::io::Write;
+use repository::{InMemoryRepository, TodoRepository};
+use todo_cli::Todo;
+use crate::repository::ShowTodosOptions;
 fn main() {
     let mut todo_repo: InMemoryRepository = InMemoryRepository::new();
 
