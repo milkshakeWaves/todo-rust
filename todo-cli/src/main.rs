@@ -30,10 +30,8 @@ fn main() {
         match parts[0] {
             "create" => {
                 println!("Creating a new todo...");
-                match todo_repo.create_todo(&parts[1..].join(" ")) {
-                    Some(created_todo) => println!("Todo {:?} successfully created!", created_todo),
-                    _ => println!("Error: cannot create todo!")
-                }
+                let inserted_todo = todo_repo.create_todo(&parts[1..].join(" "));
+                println!("Todo {:?} successfully created!", inserted_todo);
                 continue;
             }
             "edit" => {
@@ -41,7 +39,18 @@ fn main() {
                 continue;
             }
             "delete" => {
-                println!("edit a todo");
+                match parts[1].parse::<u32>() {
+                    Ok(id) => {
+                        match todo_repo.delete_todo(id) {
+                            Some(todo) => println!("Todo {:?} successfully deleted!", todo),
+                            _ => println!("Error: todo n°{} does not exist", id)
+                        }
+                    }
+                    Err(e) => {
+                        // Conversion failed
+                        println!("Failed to parse number: {}", e);
+                    }
+                }
                 continue;
             }
             "done" => {

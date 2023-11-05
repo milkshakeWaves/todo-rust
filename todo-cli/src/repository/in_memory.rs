@@ -10,15 +10,20 @@ pub struct InMemoryRepository {
 }
 
 impl TodoRepository for InMemoryRepository {
-    fn create_todo(&mut self, todo: &str) -> Option<Todo> {
+    fn create_todo(&mut self, todo: &str) -> Todo {
         let id: u32 = self.id;
-        self.id += 1;
         let todo: Todo = Todo::new(id, todo);
-        self.db.insert(id, todo.clone())
+        self.id += 1;
+        self.db.insert(id, todo.clone());
+        todo
     }
 
     fn show_todos(&self, options: &ShowTodosOptions) -> Vec<&Todo> {
         Vec::from_iter(self.db.values())
+    }
+
+    fn delete_todo(&mut self, id: u32) -> Option<Todo> {
+        self.db.remove(&id)
     }
 }
 
