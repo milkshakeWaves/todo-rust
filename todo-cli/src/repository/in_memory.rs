@@ -10,20 +10,20 @@ pub struct InMemoryRepository {
 }
 
 impl TodoRepository for InMemoryRepository {
-    fn create_todo(&mut self, todo: &str) -> Todo {
+    fn create_todo(&mut self, todo: &str) -> &Todo {
         let id: u32 = self.id;
         let todo: Todo = Todo::new(id, todo);
         self.id += 1;
-        self.db.insert(id, todo.clone());
-        todo
+        self.db.insert(id, todo);
+        self.db.get(&id).unwrap()
     }
 
-    fn show_todos(&self, options: &ShowTodosOptions) -> Box<dyn Iterator<Item = &Todo>> {
+    fn show_todos(&self, options: &ShowTodosOptions) -> Vec<&Todo> {
         let values = self.db.values();
         match options {
-            ShowTodosOptions::Done => Box::new(values.filter(|t| t.is_done())),
-            ShowTodosOptions::Todo => Box::new(values.filter(|t| !t.is_done())),
-            _ => Box::new(values.into_iter()),
+            ShowTodosOptions::Done => values.filter(|t| t.is_done()).collect(),
+            ShowTodosOptions::Todo => values.filter(|t| !t.is_done()).collect(),
+            _ => values.collect(),
         }
     }
 
@@ -32,11 +32,12 @@ impl TodoRepository for InMemoryRepository {
     }
 
     fn mark_as_done(&mut self, id: u32) -> bool {
-        if let Some(todo) = self.db.get_mut(&id) {
-            todo.mark_as_done();
-            true
-        } else {
-            false
+        match self.db.get(&id) {
+            Some(value) => {
+                self.db.insert(id, Todo::mark_as_done(value.clone()));
+                true
+            }
+            _ => false,
         }
     }
 }
