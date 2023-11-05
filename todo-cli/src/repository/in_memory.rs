@@ -18,12 +18,12 @@ impl TodoRepository for InMemoryRepository {
         todo
     }
 
-    fn show_todos(&self, options: &ShowTodosOptions) -> Vec<&Todo> {
+    fn show_todos(&self, options: &ShowTodosOptions) -> Box<dyn Iterator<Item = &Todo>> {
         let values = self.db.values();
         match options {
-            ShowTodosOptions::Done => Vec::from_iter(values.filter(|t| t.is_done())),
-            ShowTodosOptions::Todo => Vec::from_iter(values.filter(|t| !t.is_done())),
-            _ => Vec::from_iter(values),
+            ShowTodosOptions::Done => Box::new(values.filter(|t| t.is_done())),
+            ShowTodosOptions::Todo => Box::new(values.filter(|t| !t.is_done())),
+            _ => Box::new(values.into_iter()),
         }
     }
 
