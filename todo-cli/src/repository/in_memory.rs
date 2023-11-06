@@ -31,13 +31,13 @@ impl TodoRepository for InMemoryRepository {
         self.db.remove(&id)
     }
 
-    fn mark_as_done(&mut self, id: u32) -> bool {
+    fn mark_as_done(&mut self, id: u32) -> Option<Todo> {
         match self.db.get(&id) {
             Some(value) => {
                 self.db.insert(id, Todo::mark_as_done(value.clone()));
-                true
+                Some(self.db.get(&id).unwrap().clone())
             }
-            _ => false,
+            _ => None,
         }
     }
 }

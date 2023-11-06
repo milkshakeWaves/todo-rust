@@ -35,4 +35,8 @@ impl Todo {
     pub fn is_done(&self) -> bool {
         self.done
     }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
 }
