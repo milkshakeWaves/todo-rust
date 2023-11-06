@@ -10,20 +10,21 @@ pub struct InMemoryRepository {
 }
 
 impl TodoRepository for InMemoryRepository {
-    fn create_todo(&mut self, todo: &str) -> &Todo {
-        let id: u32 = self.id;
-        let todo: Todo = Todo::new(id, todo);
+    fn create_todo(&mut self, todo: &str) -> Todo {
+let id: u32 = self.id;
+        let todo = Todo::new(id, todo);
+        let todo_clone = todo.clone();
         self.id += 1;
         self.db.insert(id, todo);
-        self.db.get(&id).unwrap()
+        todo_clone
     }
 
-    fn show_todos(&self, options: &ShowTodosOptions) -> Vec<&Todo> {
+    fn show_todos(&self, options: &ShowTodosOptions) -> Vec<Todo> {
         let values = self.db.values();
         match options {
-            ShowTodosOptions::Done => values.filter(|t| t.is_done()).collect(),
-            ShowTodosOptions::Todo => values.filter(|t| !t.is_done()).collect(),
-            _ => values.collect(),
+            ShowTodosOptions::Done => values.filter(|t| t.is_done()).cloned().collect(),
+            ShowTodosOptions::Todo => values.filter(|t| !t.is_done()).cloned().collect(),
+            _ => values.cloned().collect(),
         }
     }
 
@@ -32,12 +33,11 @@ impl TodoRepository for InMemoryRepository {
     }
 
     fn mark_as_done(&mut self, id: u32) -> Option<Todo> {
-        match self.db.get(&id) {
-            Some(value) => {
-                self.db.insert(id, Todo::mark_as_done(value.clone()));
-                Some(self.db.get(&id).unwrap().clone())
-            }
-            _ => None,
+        if let Some(todo) = self.db.get_mut(&id) {
+            todo.mark_as_done();
+            Some(todo.clone())
+        } else {
+            None
         }
     }
 }

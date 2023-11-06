@@ -20,12 +20,9 @@ impl Todo {
         }
     }
 
-    pub fn mark_as_done(old_todo: Todo) -> Todo {
-        Todo {
-            done: true,
-            updated_at: Some(Local::now()),
-            ..old_todo
-        }
+    pub fn mark_as_done(&mut self) -> () {
+        self.done = true;
+        self.updated_at = Some(Local::now())
     }
 
     pub fn body(&self) -> &str {

@@ -48,7 +48,7 @@ fn main() {
                 continue;
             }
             "show" => {
-                let todos_to_show: Vec<&Todo> = match parts.get(1) {
+                let todos_to_show: Vec<Todo> = match parts.get(1) {
                     Some(option) => match *option {
                         "done" => todo_repo.show_todos(&ShowTodosOptions::Done),
                         "todo" => todo_repo.show_todos(&ShowTodosOptions::Todo),
