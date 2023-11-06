@@ -1,15 +1,18 @@
-use std::io;
-use std::io::Write;
-
-use repository::{InMemoryRepository, TodoRepository};
-use todo_cli::Todo;
-
-use crate::repository::ShowTodosOptions;
-
 mod repository;
 
+use crate::repository::ShowTodosOptions;
+use repository::{InMemoryRepository, TodoRepository};
+
+use std::io;
+use std::io::Write;
+use todo_cli::Todo;
+
+fn get_repository() -> Box<dyn TodoRepository> {
+    Box::new(InMemoryRepository::new())
+}
+
 fn main() {
-    let mut todo_repo: InMemoryRepository = InMemoryRepository::new();
+    let mut todo_repo: Box<dyn TodoRepository> = get_repository();
 
     loop {
         println!("Enter a command!");
@@ -28,9 +31,7 @@ fn main() {
 
         match parts[0] {
             "create" => {
-                println!("Creating a new todo...");
-                let inserted_todo = todo_repo.create_todo(&parts[1..].join(" "));
-                println!("Todo {:?} successfully created!", inserted_todo);
+                handle_create(&mut todo_repo, &parts);
                 continue;
             }
             "edit" => {
@@ -38,35 +39,26 @@ fn main() {
                 continue;
             }
             "delete" => {
-                match parts[1].parse::<u32>() {
-                    Ok(id) => match todo_repo.delete_todo(id) {
-                        Some(todo) => println!("Todo {:?} successfully deleted!", todo),
-                        _ => println!("Error: todo n°{} does not exist", id),
-                    },
-                    Err(e) => {
-                        // Conversion failed
-                        println!("Failed to parse number: {}", e);
-                    }
+                match handle_delete(&parts, &mut todo_repo) {
+                    Some(todo) => println!("Todo n°{} successfully deleted!", todo.id()),
+                    _ => println!("{}", "Cannot delete todo!"),
                 }
                 continue;
             }
             "done" => {
-                match parts[1].parse::<u32>() {
-                    Ok(id) => {
-                        todo_repo.mark_as_done(id);
-                        println!("Todo n°{} marked as done", id);
-                    }
-                    Err(e) => {
-                        // Conversion failed
-                        println!("Failed to parse number: {}", e);
-                    }
+                match handle_done(&parts, &mut todo_repo) {
+                    Some(todo) => println!("Todo n°{} marked as done!", todo.id()),
+                    _ => println!("{}", "Cannot mark todo as done!"),
                 }
                 continue;
             }
             "show" => {
-                let todos_to_show = match parts[1] {
-                    "done" => todo_repo.show_todos(&ShowTodosOptions::Done),
-                    "todo" => todo_repo.show_todos(&ShowTodosOptions::Todo),
+                let todos_to_show: Vec<Todo> = match parts.get(1) {
+                    Some(option) => match *option {
+                        "done" => todo_repo.show_todos(&ShowTodosOptions::Done),
+                        "pending" => todo_repo.show_todos(&ShowTodosOptions::Pending),
+                        _ => todo_repo.show_todos(&ShowTodosOptions::All),
+                    },
                     _ => todo_repo.show_todos(&ShowTodosOptions::All),
                 };
                 println!("############################################");
@@ -85,4 +77,28 @@ fn main() {
             }
         }
     }
+}
+
+fn handle_done(parts: &Vec<&str>, todo_repo: &mut Box<dyn TodoRepository>) -> Option<Todo> {
+    parts.get(1).and_then(|index| {
+        index
+            .parse::<u32>()
+            .ok()
+            .and_then(|id| todo_repo.mark_as_done(id))
+    })
+}
+
+fn handle_delete(parts: &Vec<&str>, todo_repo: &mut Box<dyn TodoRepository>) -> Option<Todo> {
+    parts.get(1).and_then(|index| {
+        index
+            .parse::<u32>()
+            .ok()
+            .and_then(|id| todo_repo.delete_todo(id))
+    })
+}
+
+fn handle_create(todo_repo: &mut Box<dyn TodoRepository>, parts: &Vec<&str>) {
+    println!("Creating a new todo...");
+    let inserted_todo = todo_repo.create_todo(&*parts[1..].join(" "));
+    println!("Todo {:?} successfully created!", inserted_todo);
 }
