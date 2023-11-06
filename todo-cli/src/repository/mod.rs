@@ -11,7 +11,7 @@ pub trait TodoRepository {
 pub enum ShowTodosOptions {
     All,
     Done,
-    Todo
+    Pending
 }
 
 // Implement in-memory storage repository

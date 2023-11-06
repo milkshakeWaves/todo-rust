@@ -6,8 +6,13 @@ use repository::{InMemoryRepository, TodoRepository};
 use std::io;
 use std::io::Write;
 use todo_cli::Todo;
+
+fn get_repository() -> Box<dyn TodoRepository> {
+    Box::new(InMemoryRepository::new())
+}
+
 fn main() {
-    let mut todo_repo: InMemoryRepository = InMemoryRepository::new();
+    let mut todo_repo: Box<dyn TodoRepository> = get_repository();
 
     loop {
         println!("Enter a command!");
@@ -51,7 +56,7 @@ fn main() {
                 let todos_to_show: Vec<Todo> = match parts.get(1) {
                     Some(option) => match *option {
                         "done" => todo_repo.show_todos(&ShowTodosOptions::Done),
-                        "todo" => todo_repo.show_todos(&ShowTodosOptions::Todo),
+                        "pending" => todo_repo.show_todos(&ShowTodosOptions::Pending),
                         _ => todo_repo.show_todos(&ShowTodosOptions::All),
                     },
                     _ => todo_repo.show_todos(&ShowTodosOptions::All),
@@ -74,7 +79,7 @@ fn main() {
     }
 }
 
-fn handle_done(parts: &Vec<&str>, todo_repo: &mut InMemoryRepository) -> Option<Todo> {
+fn handle_done(parts: &Vec<&str>, todo_repo: &mut Box<dyn TodoRepository>) -> Option<Todo> {
     parts.get(1).and_then(|index| {
         index
             .parse::<u32>()
@@ -83,7 +88,7 @@ fn handle_done(parts: &Vec<&str>, todo_repo: &mut InMemoryRepository) -> Option<
     })
 }
 
-fn handle_delete(parts: &Vec<&str>, todo_repo: &mut InMemoryRepository) -> Option<Todo> {
+fn handle_delete(parts: &Vec<&str>, todo_repo: &mut Box<dyn TodoRepository>) -> Option<Todo> {
     parts.get(1).and_then(|index| {
         index
             .parse::<u32>()
@@ -92,7 +97,7 @@ fn handle_delete(parts: &Vec<&str>, todo_repo: &mut InMemoryRepository) -> Optio
     })
 }
 
-fn handle_create(todo_repo: &mut InMemoryRepository, parts: &Vec<&str>) {
+fn handle_create(todo_repo: &mut Box<dyn TodoRepository>, parts: &Vec<&str>) {
     println!("Creating a new todo...");
     let inserted_todo = todo_repo.create_todo(&*parts[1..].join(" "));
     println!("Todo {:?} successfully created!", inserted_todo);

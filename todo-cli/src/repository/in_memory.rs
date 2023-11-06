@@ -23,7 +23,7 @@ let id: u32 = self.id;
         let values = self.db.values();
         match options {
             ShowTodosOptions::Done => values.filter(|t| t.is_done()).cloned().collect(),
-            ShowTodosOptions::Todo => values.filter(|t| !t.is_done()).cloned().collect(),
+            ShowTodosOptions::Pending => values.filter(|t| !t.is_done()).cloned().collect(),
             _ => values.cloned().collect(),
         }
     }
