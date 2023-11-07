@@ -11,7 +11,7 @@ pub struct InMemoryRepository {
 
 impl TodoRepository for InMemoryRepository {
     fn create_todo(&mut self, todo: &str) -> Todo {
-let id: u32 = self.id;
+        let id: u32 = self.id;
         let todo = Todo::new(id, todo);
         let todo_clone = todo.clone();
         self.id += 1;
@@ -50,3 +50,6 @@ impl InMemoryRepository {
         }
     }
 }
+
+#[cfg(test)]
+mod tests;
