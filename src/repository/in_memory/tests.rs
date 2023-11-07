@@ -30,7 +30,7 @@ mod tests {
         // Todo 10 does not exist either
         assert!(in_memory_db.delete_todo(10).is_none());
 
-        add_todo(&mut in_memory_db, todo_description);
+        in_memory_db.create_todo(todo_description);
 
         // Act
         let deleted_todo = in_memory_db.delete_todo(0);
@@ -47,7 +47,7 @@ mod tests {
         // Arrange
         let mut in_memory_db = InMemoryRepository::new();
         for desc in ["First", "Second", "Third", "Fourth"] {
-            add_todo(&mut in_memory_db, desc);
+            in_memory_db.create_todo(desc);
         }
 
         // Act
@@ -67,7 +67,7 @@ mod tests {
         let mut in_memory_db = InMemoryRepository::new();
         let todos_to_insert = ["First", "Second", "Third", "Fourth"];
         for desc in todos_to_insert {
-            add_todo(&mut in_memory_db, desc);
+            in_memory_db.create_todo(desc);
         }
 
         // Act
@@ -84,7 +84,7 @@ mod tests {
         let mut in_memory_db = InMemoryRepository::new();
         let todos_to_insert = ["First", "Second", "Third", "Fourth"];
         for desc in todos_to_insert {
-            add_todo(&mut in_memory_db, desc);
+            in_memory_db.create_todo(desc);
         }
 
         // Act
@@ -102,7 +102,7 @@ mod tests {
         let mut in_memory_db = InMemoryRepository::new();
         let todos_to_insert = ["First", "Second", "Third", "Fourth"];
         for desc in todos_to_insert {
-            add_todo(&mut in_memory_db, desc);
+            in_memory_db.create_todo(desc);
         }
 
         // Act
@@ -114,9 +114,5 @@ mod tests {
         for todo in todos {
             assert!(!todo.is_done())
         }
-    }
-
-    fn add_todo(db: &mut InMemoryRepository, todo: &str) -> Todo {
-        db.create_todo(todo)
     }
 }
